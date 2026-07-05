@@ -1,4 +1,5 @@
 import datetime
+from django.db.models.fields.json import KeyTransform
 
 from django.db.models import (
     DateTimeField, DecimalField, FloatField, IntegerField,
@@ -68,6 +69,20 @@ def when(self, compiler, connection, **extra_context):
     return self.as_sql(compiler, connection, **extra_context)
 
 
+def key_transform_as_cockroachdb(self, compiler, connection):
+    lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
+    if len(key_transforms) > 1:
+        sql = "(%s %s %%s::text[])" % (lhs, self.postgres_nested_operator)
+        return sql, (*params, key_transforms)
+    try:
+        lookup = int(self.key_name)
+        cast = "::int"
+    except ValueError:
+        lookup = self.key_name
+        cast = "::text"
+    return "(%s %s %%s%s)" % (lhs, self.postgres_operator, cast), (*params, lookup)
+
+
 def register_functions():
     math_funcs_needing_float_cast = (
         ACos, ASin, ATan, ATan2, Ceil, Cos, Cot, Degrees, Exp, Floor, Ln, Log,
@@ -83,3 +98,4 @@ def register_functions():
     Round.as_cockroachdb = round_cast
     StrIndex.as_cockroachdb = StrIndex.as_postgresql
     When.as_cockroachdb = when
+    KeyTransform.as_cockroachdb = key_transform_as_cockroachdb

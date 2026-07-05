@@ -111,6 +111,17 @@ class DatabaseSchemaEditor(PostgresDatabaseSchemaEditor):
                 # is used instead.
                 [],
             )
+        
+        elif (
+                old_internal_type in ('TextField', 'CharField') and
+                new_internal_type == 'JSONField'
+            ):
+            # TEXT to JSONB requires explicit USING cast on CockroachDB.
+            return PostgresDatabaseSchemaEditor._alter_column_type_sql(
+                self, model, old_field, new_field, new_type,
+                old_collation, new_collation,
+            )
+
         else:
             return BaseDatabaseSchemaEditor._alter_column_type_sql(
                 self, model, old_field, new_field, new_type,
