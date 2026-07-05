@@ -69,18 +69,18 @@ def when(self, compiler, connection, **extra_context):
     return self.as_sql(compiler, connection, **extra_context)
 
 
-def key_transform_as_cockroachdb(self, compiler, connection):
+def key_transform_as_cockroachdb(self, compiler, connection, **extra_context):
+    # CockroachDB does not support assigning jsonb -> result to a string column.
+    # Use ->> and #>> which return STRING instead of jsonb.
     lhs, params, key_transforms = self.preprocess_lhs(compiler, connection)
     if len(key_transforms) > 1:
-        sql = "(%s %s %%s::text[])" % (lhs, self.postgres_nested_operator)
+        sql = "(%s #>> %%s)" % lhs
         return sql, (*params, key_transforms)
     try:
         lookup = int(self.key_name)
-        cast = "::int"
     except ValueError:
         lookup = self.key_name
-        cast = "::text"
-    return "(%s %s %%s%s)" % (lhs, self.postgres_operator, cast), (*params, lookup)
+    return "(%s ->> %%s)" % lhs, (*params, lookup)
 
 
 def register_functions():

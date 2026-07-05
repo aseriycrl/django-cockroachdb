@@ -1,19 +1,66 @@
+diff --git a/django/db/backends/postgresql/features.py b/django/db/backends/postgresql/features.py
+index 9d5fab2..1b509dd 100644
+--- a/django/db/backends/postgresql/features.py
++++ b/django/db/backends/postgresql/features.py
+@@ -155,6 +155,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
+             "PositiveBigIntegerField": "BigIntegerField",
+             "PositiveIntegerField": "IntegerField",
+             "PositiveSmallIntegerField": "SmallIntegerField",
++            "JSONField": "JSONField",
+         }
+ 
+     @cached_property
+diff --git a/tests/model_fields/models.py b/tests/model_fields/models.py
+index bedca1e..efa746a 100644
+--- a/tests/model_fields/models.py
++++ b/tests/model_fields/models.py
+@@ -724,3 +724,12 @@ class GeneratedModelUniqueConstraintVirtual(GeneratedModelVirtualBase):
+                 F("a"), name="Generated model unique constraint virtual a"
+             ),
+         ]
++
++
++class JSONWithTextField(models.Model):
++    json = models.JSONField()
++    text = models.TextField(null=True, blank=True)
++
++    class Meta:
++        required_db_features = {"supports_json_field"}
++
+diff --git a/tests/model_fields/test_jsonfield.py b/tests/model_fields/test_jsonfield.py
+index b16499d..4680bc7 100644
+--- a/tests/model_fields/test_jsonfield.py
++++ b/tests/model_fields/test_jsonfield.py
+@@ -46,6 +46,7 @@ from .models import (
+     JSONModel,
+     NullableJSONModel,
+     RelatedJSONModel,
++    JSONWithTextField,
+ )
+ 
+ 
+@@ -1241,3 +1242,15 @@ class TestQuerying(TestCase):
+             data__foo="bar"
+         )
+         self.assertQuerySetEqual(qs, all_objects)
++
++
++    @skipUnlessDBFeature("supports_json_field")
++    def test_update_with_json_key_transform(self):
++        obj = JSONWithTextField.objects.create(
++            json={"meta": {"title": "My Page"}}
++        )
++        JSONWithTextField.objects.filter(pk=obj.pk).update(
++            text=F("json__meta__title")
++        )
++        obj.refresh_from_db()
++        self.assertEqual(obj.text, "My Page")
+\ No newline at end of file
+diff --git a/tests/schema/tests.py b/tests/schema/tests.py
+index a8b416e..a66442a 100644
 --- a/tests/schema/tests.py
 +++ b/tests/schema/tests.py
-@@ ... @@
-     def test_alter_text_field_to_time_field(self):
-         """
-         #25002 - Test conversion of text field to time field.
-         """
-         with connection.schema_editor() as editor:
-             editor.create_model(Note)
-         Note.objects.create(info="3:16:17.4567")
-         old_field = Note._meta.get_field("info")
-         new_field = TimeField(blank=True)
-         new_field.set_attributes_from_name("info")
-         with connection.schema_editor() as editor:
-             editor.alter_field(Note, old_field, new_field, strict=True)
-         # Make sure the field isn't nullable
+@@ -1263,6 +1263,25 @@ class SchemaTests(TransactionTestCase):
          columns = self.column_classes(Note)
          self.assertFalse(columns["info"][1][6])
  
@@ -38,4 +85,4 @@
 +
      @skipIfDBFeature("interprets_empty_strings_as_nulls")
      def test_alter_textual_field_keep_null_status(self):
-
+         """
