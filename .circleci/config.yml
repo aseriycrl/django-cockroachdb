@@ -20,10 +20,9 @@ jobs:
           command: |
             cd _django_repo/tests
             pip3 install -e ..
-            pip3 install -r requirements/py3.txt
             pip3 install -r requirements/postgres.txt
             cd ../..
-            pip3 install .
+            pip3 install -e .
       - run:
           name: Apply Django patches
           command: |
@@ -38,7 +37,7 @@ jobs:
           name: Run tests
           command: |
             cd _django_repo/tests/
-            python3 ../../django-test-suite/runtests.py
+            python3 runtests.py --settings cockroach_settings schema expressions model_fields db_functions
 
 workflows:
   test:

@@ -55,7 +55,7 @@ index b16499d..4680bc7 100644
 +        )
 +        obj.refresh_from_db()
 +        self.assertEqual(obj.text, "My Page")
-\ No newline at end of file
+
 diff --git a/tests/schema/tests.py b/tests/schema/tests.py
 index a8b416e..a66442a 100644
 --- a/tests/schema/tests.py
