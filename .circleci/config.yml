@@ -37,7 +37,7 @@ jobs:
           name: Run tests
           command: |
             cd _django_repo/tests/
-            python3 runtests.py --settings cockroach_settings schema expressions model_fields db_functions
+            python3 runtests.py --settings cockroach_settings --noinput --keepdb schema expressions model_fields db_functions
 
 workflows:
   test:
