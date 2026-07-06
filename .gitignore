@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# locally cloned Django repo for testing
+_django_repo/
+

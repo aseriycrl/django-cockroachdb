@@ -1,28 +1,27 @@
-import os
-
 DATABASES = {
     'default': {
         'ENGINE': 'django_cockroachdb',
         'NAME': 'django_tests',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'USER': os.environ['CRDB_USER'],
+        'PASSWORD': os.environ['CRDB_PASSWORD'],
+        'HOST': os.environ['CRDB_HOST'],
         'PORT': 26257,
-        'OPTIONS': {},
+        'OPTIONS': {
+            'server_side_binding': True,
+        },
     },
     'other': {
         'ENGINE': 'django_cockroachdb',
         'NAME': 'django_tests2',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'USER': os.environ['CRDB_USER'],
+        'PASSWORD': os.environ['CRDB_PASSWORD'],
+        'HOST': os.environ['CRDB_HOST'],
         'PORT': 26257,
-        'OPTIONS': {},
+        'OPTIONS': {
+            'server_side_binding': True,
+        },
     },
 }
-if os.environ.get('USE_SERVER_SIDE_BINDING') == 'server_side_binding':
-    DATABASES['default']['OPTIONS']['server_side_binding'] = True
-    DATABASES['other']['OPTIONS']['server_side_binding'] = True
 
 SECRET_KEY = 'django_tests_secret_key'
 PASSWORD_HASHERS = [

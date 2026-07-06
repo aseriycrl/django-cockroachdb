@@ -1,0 +1,43 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          name: Clone Django
+          command: |
+            rm -rf _django_repo
+            git clone --depth 1 --single-branch --branch cockroach-6.0.x \
+              https://github.com/timgraham/django _django_repo
+      - run:
+          name: Install dependencies
+          command: |
+            cd _django_repo/tests/
+            pip3 install -e ..
+            pip3 install -r requirements/py3.txt
+            pip3 install -r requirements/postgres.txt
+            cd ../..
+            pip3 install .
+      - run:
+          name: Apply Django patches
+          command: |
+            cd _django_repo
+            git apply ../django.patch
+      - run:
+          name: Configure settings
+          command: |
+            cp django-test-suite/cockroach_settings.py _django_repo/tests/cockroach_settings.py
+            cp django-test-suite/cockroach_gis_settings.py _django_repo/tests/cockroach_gis_settings.py
+      - run:
+          name: Run tests
+          command: |
+            cd _django_repo/tests/
+            python3 ../../django-test-suite/runtests.py
+
+workflows:
+  test:
+    jobs:
+      - test
