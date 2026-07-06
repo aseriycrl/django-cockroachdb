@@ -266,7 +266,7 @@ class DatabaseFeatures(PostgresDatabaseFeatures):
                 # error in argument for $2: could not parse ":" as type int2:
                 # strconv.ParseInt: parsing ":": invalid syntax
                 # https://github.com/cockroachdb/cockroach/issues/136295
-                'db_functions.text.test_concat.ConcatTests.test_concat_non_str',
+                # 'db_functions.text.test_concat.ConcatTests.test_concat_non_str',
                 # unsupported binary operator: <interval> / <decimal>
                 'expressions.tests.FTimeDeltaTests.test_durationfield_multiply_divide',
                 # InvalidParameterValue: unsupported binary operator: <int4> / <float>
@@ -299,8 +299,8 @@ class DatabaseFeatures(PostgresDatabaseFeatures):
                     # concat(): error type checking resolved expression::
                     # could not determine data type of placeholder $1
                     'aggregation_regress.tests.AggregationTests.test_aggregate_group_by_unseen_columns_unmanaged',
-                    'db_functions.text.test_concat.ConcatTests.test_many',
-                    'db_functions.text.test_concat.ConcatTests.test_mixed_char_text',
+                    # 'db_functions.text.test_concat.ConcatTests.test_many',
+                    # 'db_functions.text.test_concat.ConcatTests.test_mixed_char_text',
                     'db_functions.text.test_replace.ReplaceTests.test_replace_expression',
                     'expressions.tests.BasicExpressionsTests.test_slicing_of_f_expression_with_annotated_expression',
                     'filtered_relation.tests.FilteredRelationTests.test_condition_with_func_and_lookup_outside_relation_name',  # noqa

@@ -2,7 +2,7 @@ import datetime
 from django.db.models.fields.json import KeyTransform
 
 from django.db.models import (
-    DateTimeField, DecimalField, FloatField, IntegerField,
+    DateTimeField, DecimalField, FloatField, IntegerField, TextField, Value,
 )
 from django.db.models.expressions import When
 from django.db.models.functions import (
@@ -10,6 +10,7 @@ from django.db.models.functions import (
     Exp, Floor, JSONArray, JSONObject, Ln, Log, Now, Radians, Round, Sin, Sqrt,
     StrIndex, Tan,
 )
+from django.db.models.functions.text import ConcatPair
 
 
 def coalesce(self, compiler, connection, **extra_context):
@@ -83,6 +84,26 @@ def key_transform_as_cockroachdb(self, compiler, connection, **extra_context):
     return "(%s ->> %%s)" % lhs, (*params, lookup)
 
 
+def concat_pair_as_cockroachdb(self, compiler, connection, **extra_context):
+    # Cast all expressions to TextField to resolve type ambiguity
+    # with server-side binding, then use || operator.
+    c = self.copy()
+    c.set_source_expressions([
+        Coalesce(
+            Cast(expression, TextField()),
+            Value("", output_field=TextField()),
+        )
+        for expression in c.get_source_expressions()
+    ])
+    return super(ConcatPair, c).as_sql(
+        compiler,
+        connection,
+        template="(%(expressions)s)",
+        arg_joiner=" || ",
+        **extra_context,
+    )
+    
+
 def register_functions():
     math_funcs_needing_float_cast = (
         ACos, ASin, ATan, ATan2, Ceil, Cos, Cot, Degrees, Exp, Floor, Ln, Log,
@@ -99,3 +120,4 @@ def register_functions():
     StrIndex.as_cockroachdb = StrIndex.as_postgresql
     When.as_cockroachdb = when
     KeyTransform.as_cockroachdb = key_transform_as_cockroachdb
+    ConcatPair.as_cockroachdb = concat_pair_as_cockroachdb
