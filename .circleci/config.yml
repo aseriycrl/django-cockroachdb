@@ -13,9 +13,12 @@ jobs:
             git clone --depth 1 --single-branch --branch cockroach-6.0.x \
               https://github.com/timgraham/django _django_repo
       - run:
+          name: Install system dependencies
+          command: sudo apt-get update && sudo apt-get install -y libmemcached-dev
+      - run:
           name: Install dependencies
           command: |
-            cd _django_repo/tests/
+            cd _django_repo/tests
             pip3 install -e ..
             pip3 install -r requirements/py3.txt
             pip3 install -r requirements/postgres.txt
