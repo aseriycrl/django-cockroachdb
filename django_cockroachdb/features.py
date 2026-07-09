@@ -286,7 +286,7 @@ class DatabaseFeatures(PostgresDatabaseFeatures):
                     # type of placeholder $3. This worked until v24.3 added
                     # support for non-string data to concat():
                     # https://github.com/cockroachdb/cockroach/pull/127098#issuecomment-2492652084
-                    "model_fields.test_uuid.TestQuerying.test_filter_with_expr",
+                    # "model_fields.test_uuid.TestQuerying.test_filter_with_expr",
                 })
             if self.is_cockroachdb_25_1:
                 expected_failures.update({
@@ -301,8 +301,8 @@ class DatabaseFeatures(PostgresDatabaseFeatures):
                     'aggregation_regress.tests.AggregationTests.test_aggregate_group_by_unseen_columns_unmanaged',
                     # 'db_functions.text.test_concat.ConcatTests.test_many',
                     # 'db_functions.text.test_concat.ConcatTests.test_mixed_char_text',
-                    'db_functions.text.test_replace.ReplaceTests.test_replace_expression',
-                    'expressions.tests.BasicExpressionsTests.test_slicing_of_f_expression_with_annotated_expression',
+                    # 'db_functions.text.test_replace.ReplaceTests.test_replace_expression',
+                    # 'expressions.tests.BasicExpressionsTests.test_slicing_of_f_expression_with_annotated_expression',
                     'filtered_relation.tests.FilteredRelationTests.test_condition_with_func_and_lookup_outside_relation_name',  # noqa
                     'select_for_update.tests.SelectForUpdateTests.test_for_update_of_values_list',
                 })
